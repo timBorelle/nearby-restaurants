@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then
+  echo "You must fill in 3 arguments !"
+  echo "Example: ./search latitude=48.8319929 longitude=2.3245488 radius=100"
+  exit 1
+fi
+
+python3 nearby_restaurants.py $1 $2 $3
