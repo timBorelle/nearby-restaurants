@@ -17,7 +17,14 @@ logger.setLevel(logging.INFO)
 
 def main(argv):
     geojson_file = "./data/restaurants_paris.geojson"
-    data = load_data(geojson_file)
+    try:
+        data = load_data(geojson_file)
+    except ValueError as ve:
+        logger.error("Incorrect data format. " + str(ve))
+        exit(1)
+    except TypeError as te:
+        logger.error("Incorrect data type. " + str(te))
+        exit(1)
     latitude = float(argv[0].split("=", 1)[1])
     longitude = float(argv[1].split("=", 1)[1])
     radius = float(argv[2].split("=", 1)[1])
@@ -25,7 +32,7 @@ def main(argv):
     show_output(nearby_stations)
 
 # load geojson data file 
-def load_data(geojson_file):
+def load_data(geojson_file: dict) -> dict:
     start_loading = datetime.now()
     with open(geojson_file) as data_file:    
         data = json.load(data_file)
@@ -34,10 +41,10 @@ def load_data(geojson_file):
     return data
 
 # calculate distance between two point
-def calculate_distance_between_two_points(loc1: tuple, loc2: tuple):
+def calculate_distance_between_two_points(loc1: tuple, loc2: tuple) -> float:
     return round(hs.haversine(loc1, loc2, unit=Unit.METERS), 2)
 
-def query_search(data, latitude, longitude, radius):
+def query_search(data, latitude: float, longitude: float, radius: float) -> list:
     start_query_search = datetime.now()
     input_loc = (latitude, longitude)
     nearby_stations = []
