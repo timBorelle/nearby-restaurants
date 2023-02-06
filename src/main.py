@@ -11,15 +11,17 @@ logging.basicConfig()
 logger = logging.getLogger("execution-time")
 logger.setLevel(logging.INFO)
 
-argv = sys.argv[1:]
-input_latitude = 0.0
-input_longitude = 0.0
-input_radius = 0.0
+#input_latitude = 0.0
+#input_longitude = 0.0
+#input_radius = 0.0
 
-def main():
+def main(argv):
     geojson_file = "./data/restaurants_paris.geojson"
     data = load_data(geojson_file)
-    nearby_stations = query_search(data)
+    latitude = float(argv[0].split("=", 1)[1])
+    longitude = float(argv[1].split("=", 1)[1])
+    radius = float(argv[2].split("=", 1)[1])
+    nearby_stations = query_search(data, latitude, longitude, radius)
     show_output(nearby_stations)
 
 # load geojson data file 
@@ -35,12 +37,9 @@ def load_data(geojson_file):
 def calculate_distance_between_two_points(loc1: tuple, loc2: tuple):
     return round(hs.haversine(loc1, loc2, unit=Unit.METERS), 2)
 
-def query_search(data):
+def query_search(data, latitude, longitude, radius):
     start_query_search = datetime.now()
-    input_latitude = float(argv[0].split("=", 1)[1])
-    input_longitude = float(argv[1].split("=", 1)[1])
-    input_radius = float(argv[2].split("=", 1)[1])
-    input_loc = (input_latitude, input_longitude)
+    input_loc = (latitude, longitude)
     nearby_stations = []
     # iterate over each restaurant
     for r in data["features"]:
@@ -51,7 +50,7 @@ def query_search(data):
             longitude = point_data["coordinates"][0]
             current_loc = (latitude, longitude)
             res_radius = calculate_distance_between_two_points(input_loc, current_loc)
-            if res_radius <= input_radius:
+            if res_radius <= radius:
                 name = r["properties"]["name"]
                 station_data = "name:" + name + ",longitude:" + str(longitude) + ",latitude:" + str(latitude) + ",distance:" + str(res_radius)
                 # add station data to nearby_stations list
@@ -67,4 +66,5 @@ def show_output(nearby_stations: list):
             print(elem)
 
 if __name__ == "__main__":
-    main()
+    argv = sys.argv[1:]
+    main(argv)
